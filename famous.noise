@@ -1,0 +1,53 @@
+#include <iostream>
+
+using namespace std;
+
+void createtable(double  *table,  const int size,int mypower, int errpow);
+
+
+int main(void)
+{
+	setlocale(LC_ALL,"Russian");
+
+	const int size =20;	 
+	double  *Table = new double [size];// массив для хранения вероятности
+	int mypower=7;
+	int errpow=9;
+
+	createtable(Table,size,mypower,errpow);
+
+	system("pause");
+	return 0;
+}
+
+
+void createtable(double  *table,  const int size,int mypower, int errpow)
+{
+	cout<< "ID"<<"	Probability of error"<<endl;
+
+	double a=0.0;
+	double b=(double)mypower/(double)errpow;
+	double x=errpow/errpow;
+	double y=(double)mypower/(double)errpow;
+
+	table[0]=0;
+	cout<< "0		"<<table[0]<<endl;
+
+	for(int i=1;i<=size;i++)
+	{
+		a=(double)x-(double)b;
+		b=(double)y-(double)a;
+		table[i]=(a*b);
+		if(b<0)	//тк вероятность не может быть <0
+		{
+			b=x+b;
+			table[i]=0;
+		}
+		if(	table[i]>1)
+		{
+			table[i]=0; //тк вероятность не может быть >1
+		}
+
+		cout<<i<<"		"<<table[i]<<endl;
+	}
+}
