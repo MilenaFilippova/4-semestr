@@ -1,0 +1,62 @@
+#include <iostream>
+#include <fstream>
+#include <locale.h>
+#include <string.h>
+#include <iomanip>
+
+using namespace std;
+
+class Base
+{
+	public:
+		virtual void  who() //определение виртуальной функции
+		{ 
+			cout<<"Base"<<endl; 
+		}
+};
+
+class first_d : public Base	
+{
+	public:
+		void  who() //определение who() применительно к first_d
+		{ 
+			cout<<"First derivation"<<endl; 
+		}
+ 
+};
+
+
+class second_d : public Base	
+{
+	public:
+		void  who() //определение who() применительно к first_d
+		{ 
+			cout<<"Second derivation"<<endl; 
+		}
+ 
+};
+
+void show_who(Base &r)	//использование в каестве параметра ссылки на базовый класс
+{
+	r.who();
+}
+
+int main(void)
+{
+	setlocale(LC_ALL,"Russian");
+
+	Base base_obj;
+	Base *p;
+	first_d first_obj;
+	second_d second_obj;
+	p = &base_obj;
+	p->who();	//доступ к who класса Base
+	p = &first_obj;
+	p->who();	//доступ к who класса first
+	p = &second_obj;
+	p->who();	//доступ к who класса second
+
+	system("pause");
+	return 0;
+}
+
