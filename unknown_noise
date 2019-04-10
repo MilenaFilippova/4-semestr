@@ -1,31 +1,29 @@
 #include <iostream>
 #include <fstream>
-#include <locale.h>
-#include <string.h>
-#include <iomanip>
 
 using namespace std;
 
-void createtable(ifstream& in,double  *table,  const int size);
+int createtable(ifstream& in,double  *table,  const int size);
 int proverka_na_open_file(ifstream& in);
-void search(ofstream& out,double  *table);
-int printrezult(ofstream& out,int mypower,int errpow);
+int search(double  *table,int flag);
+int printrezult(ofstream& out,int errpow);
 
 int main(void)
 {
 	setlocale(LC_ALL,"Russian");
 
-	ifstream in("D:\\shum.txt"); 
-	proverka_na_open_file(in);
+	ifstream in("D:\\new\\input10.dat");
 
+	proverka_na_open_file(in);
 	int size=0;
 	in>>size;	//считываем из файла количествоизвестных
-	size=size-1;
 	double  *Table = new double [size];// массив для хранения вероятности
-	createtable(in,Table,size);	//считываем данные с файла в массив
-	ofstream out("D:\\newshum.txt");
-	search(out,Table);				//ищем неизвесные (частоту шума,частоу проверки)
+	int flag=createtable(in,Table,size);	//считываем данные с файла в массив и считаем сколько вначале 0
+	
+	ofstream out("D:\\newshum.txt");	//открываем файл на запись
 
+	int errpow=search(Table,flag);		//ищем неизвесные (частоту шума,частоу проверки)
+	printrezult(out,errpow);	//выводим результат в файл
 	in.close();
 	out.close();
 
@@ -41,54 +39,51 @@ int proverka_na_open_file(ifstream& in)
 		cout<< "Невозможно открыть файл. "<<endl; 
 		return 1; 
 	} 
-	if(in.fail())				//проверка на ошибку во время чтения
+	if(in.fail())		//проверка на ошибку во время чтения
 	{
 		return false;
 	}
 
 	return 0;
-
 }
 
-void createtable(ifstream& in,double  *table,  const int size) // массив для хранения вероятности
+int createtable(ifstream& in, double* table, const int size) // массив для хранения вероятности
 {
+	int flag=0;
 
-	for(int i=0;i<=size;i++)
+	for(int i=0;i<size;i++)
 	{
 		in>>table[i];
-	}
-	cout<<"Данные из файла считаны"<<endl;
-}
-
-void search(ofstream& out,double  *table) //ищем неизвесные (частоту шума,частоту проверки)
-{
-	int mypower,errpow;
-	double a=0.0;
-	double b=0;
-	double x=1.0;
-	double y=0;
-	double rezult=0;
-	int k=1;
-
-	for(mypower=1;mypower<=9;mypower++)		 //подбор чисел
-	{
-		for(errpow=1;errpow<=9;errpow++)
+		if (table [i]==0.0000000 && flag==i)
 		{
-			y=(double)mypower/(double)errpow;//высчитываем вероятность 
-			a=(double)x-(double)y;
-			b=(double)y-(double)a;
-			rezult=(a*b);
-			
-			if (abs((double)table[k]-(double)rezult) < 0.000000001) //используем такую структуру для сравнения вдух double
-			{
-				cout<<"Частота проверки: "<<mypower<<"  Частота шума: "<<errpow<<endl;
-				printrezult(out,mypower,errpow);	//найден ответ,искать больше не нужно
-			}
+			flag++;
 		}
 	}
+	cout<<"Данные из файла считаны"<<endl;
+	return flag;
+}
+
+int search( double* table,int flag) //ищем неизвесные (частоту шума,частоту проверки)
+{
+	int mypower=7,errpow=0;
+	double y=0.0,z=0.0,rezult=0.0;
+
+	for(errpow=(flag*mypower+1); errpow<=mypower*(flag+1); errpow++)	 //подбор чисел
+	{
+		y = (double)errpow-(mypower*flag);	//высчитываем вероятность 
+		z=y/errpow;
+		rezult = z*((mypower-y)/errpow);
+		if ((fabs((double)table[flag]-(double)rezult) < 0.00001)  ) //используем такую структуру для сравнения вдух double
+		{
+			cout<<"Частота проверки: "<<mypower<<"  Частота шума: "<<errpow<<endl;
+			
+			return errpow;//найден ответ,искать больше не нужно
+		}
+	}
+	return 3;
 }
 	
-int printrezult(ofstream& out,int mypower,int errpow) //вывод в файл
+int printrezult(ofstream& out,int errpow) //вывод в файл
 {
 		if (!out.is_open())
 		{ 
@@ -99,7 +94,7 @@ int printrezult(ofstream& out,int mypower,int errpow) //вывод в файл
 		{
 			return false;
 		}
-		out<<"("<<errpow<<","<<mypower<<")"<<endl;
+		out<<errpow<<endl;
 		cout<<"Результат записан в файл"<<endl;
 		return 0;
 }
